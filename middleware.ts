@@ -1,0 +1,47 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { verifyToken } from './lib/security' 
+
+const PUBLIC_PATHS = ['/login', '/api/auth/login', '/api/auth/logout']
+
+export async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl
+
+  if (
+    PUBLIC_PATHS.some(p => pathname.startsWith(p)) ||
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/favicon')
+  ) {
+    return NextResponse.next()
+  }
+
+  const token = req.cookies.get('gm_session')?.value
+
+  if (!token) {
+    return NextResponse.redirect(new URL('/login', req.url))
+  }
+
+  // AÑADIDO EL AWAIT A CONTINUACIÓN
+  const payload = await verifyToken(token)
+
+  if (!payload) {
+    const res = NextResponse.redirect(new URL('/login', req.url))
+    res.cookies.delete('gm_session')
+    return res
+  }
+
+  if (pathname.startsWith('/admin') && payload.rol !== 'admin') {
+    return NextResponse.redirect(new URL('/dashboard', req.url))
+  }
+
+  const requestHeaders = new Headers(req.headers)
+  requestHeaders.set('x-user-id',      payload.userId)
+  requestHeaders.set('x-user-email',   payload.email)
+  requestHeaders.set('x-user-rol',     payload.rol)
+  requestHeaders.set('x-user-nombre',  payload.nombre)
+
+  return NextResponse.next({ request: { headers: requestHeaders } })
+}
+
+export const config = {
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+}
