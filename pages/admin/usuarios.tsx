@@ -310,13 +310,97 @@ function ModalToggleActivo({ usuario, onClose, onConfirmar }: {
   )
 }
 
+
+// ─── Modal: Confirmar borrar ──────────────────────────────────────────────────
+function ModalBorrar({ usuario, onClose, onConfirmar }: {
+  usuario: Usuario
+  onClose: () => void
+  onConfirmar: (id: string) => void
+}) {
+  const [confirm, setConfirm] = useState('')
+  const [loading, setLoading] = useState(false)
+  const nombreCompleto = `${usuario.nombre} ${usuario.apellidos}`.trim()
+  const valido = confirm.toLowerCase() === 'borrar'
+
+  function handleBorrar() {
+    if (!valido) return
+    setLoading(true)
+    setTimeout(() => {
+      onConfirmar(usuario.id)
+      setLoading(false)
+      onClose()
+    }, 600)
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+      <div className="bg-[#1e293b] border border-[#334155] rounded-2xl w-full max-w-sm shadow-card-lg animate-in">
+        <div className="px-6 py-6 space-y-5">
+          {/* Icono peligro */}
+          <div className="w-14 h-14 rounded-full mx-auto flex items-center justify-center"
+            style={{ background:'rgba(239,68,68,0.12)', border:'2px solid rgba(239,68,68,0.25)' }}>
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+              <path d="M10 11v6M14 11v6"/>
+              <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+            </svg>
+          </div>
+
+          <div className="text-center">
+            <h2 className="text-xl font-bold text-white">Borrar usuario</h2>
+            <p className="text-sm text-slate-400 mt-2">
+              Vas a eliminar permanentemente a{' '}
+              <strong className="text-white">{nombreCompleto}</strong>.
+              Esta acción <strong className="text-red-400">no se puede deshacer</strong>.
+            </p>
+          </div>
+
+          {/* Confirmación por texto */}
+          <div>
+            <label className="label-dark text-center block">
+              Escribe <span className="text-red-400 font-bold">borrar</span> para confirmar
+            </label>
+            <input
+              value={confirm}
+              onChange={e => setConfirm(e.target.value)}
+              placeholder="borrar"
+              className="input-dark text-center mt-1"
+              style={{ borderColor: valido ? '#22c55e' : undefined }}
+            />
+          </div>
+
+          <div className="flex gap-3">
+            <button type="button" onClick={onClose} className="btn-secondary flex-1">Cancelar</button>
+            <button
+              type="button"
+              onClick={handleBorrar}
+              disabled={!valido || loading}
+              className="flex-1 py-3 rounded-lg text-sm font-semibold transition-all border"
+              style={{
+                background: valido ? 'rgba(239,68,68,0.15)' : 'rgba(239,68,68,0.05)',
+                border: '1px solid rgba(239,68,68,0.3)',
+                color: valido ? '#ef4444' : 'rgba(239,68,68,0.4)',
+                cursor: valido ? 'pointer' : 'not-allowed',
+              }}
+            >
+              {loading ? 'Borrando…' : '🗑️ Borrar definitivamente'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── Página principal ─────────────────────────────────────────────────────────
 export default function UsuariosAdminPage() {
-  const [usuarios, setUsuarios]         = useState<Usuario[]>(DEMO_USUARIOS)
-  const [modalCrear, setModalCrear]     = useState(false)
-  const [usuarioEditar, setUsuarioEditar]   = useState<Usuario | null>(null)
-  const [usuarioToggle, setUsuarioToggle]   = useState<Usuario | null>(null)
-  const [toastMsg, setToastMsg]         = useState('')
+  const [usuarios, setUsuarios]           = useState<Usuario[]>(DEMO_USUARIOS)
+  const [modalCrear, setModalCrear]       = useState(false)
+  const [usuarioEditar, setUsuarioEditar] = useState<Usuario | null>(null)
+  const [usuarioToggle, setUsuarioToggle] = useState<Usuario | null>(null)
+  const [usuarioBorrar, setUsuarioBorrar] = useState<Usuario | null>(null)
+  const [toastMsg, setToastMsg]           = useState('')
 
   function showToast(msg: string) {
     setToastMsg(msg)
@@ -337,6 +421,12 @@ export default function UsuariosAdminPage() {
     setUsuarios(prev => prev.map(u => u.id === id ? { ...u, activo: !u.activo } : u))
     const u = usuarios.find(x => x.id === id)
     showToast(u?.activo ? `⛔ ${u.nombre} desactivado` : `✅ ${u?.nombre} activado`)
+  }
+
+  function handleBorrar(id: string) {
+    const u = usuarios.find(x => x.id === id)
+    setUsuarios(prev => prev.filter(x => x.id !== id))
+    showToast(`🗑️ Usuario ${u?.nombre} eliminado`)
   }
 
   const activos   = usuarios.filter(u => u.activo).length
@@ -485,6 +575,23 @@ export default function UsuariosAdminPage() {
                                 </svg>
                               )}
                             </button>
+
+                            {/* Borrar */}
+                            <button
+                              onClick={() => setUsuarioBorrar(u)}
+                              title="Eliminar usuario"
+                              className="p-2 rounded-lg transition-all"
+                              style={{ color:'#64748b' }}
+                              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color='#f87171'; (e.currentTarget as HTMLButtonElement).style.background='rgba(239,68,68,0.12)' }}
+                              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color='#64748b'; (e.currentTarget as HTMLButtonElement).style.background='transparent' }}
+                            >
+                              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                                <polyline points="3 6 5 6 21 6"/>
+                                <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+                                <path d="M10 11v6M14 11v6"/>
+                                <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+                              </svg>
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -541,6 +648,14 @@ export default function UsuariosAdminPage() {
           usuario={usuarioToggle}
           onClose={() => setUsuarioToggle(null)}
           onConfirmar={handleToggleActivo}
+        />
+      )}
+
+      {usuarioBorrar && (
+        <ModalBorrar
+          usuario={usuarioBorrar}
+          onClose={() => setUsuarioBorrar(null)}
+          onConfirmar={handleBorrar}
         />
       )}
 
