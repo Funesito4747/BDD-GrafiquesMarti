@@ -1,22 +1,112 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-body {
-  @apply bg-surface-900 text-surface-200 antialiased;
+@layer base {
+  html { font-size: 16px; }
+
+  body {
+    @apply bg-surface-900 text-surface-200 antialiased;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar       { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { @apply bg-surface-900; }
+  ::-webkit-scrollbar-thumb { @apply bg-surface-600 rounded-full; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-surface-500; }
 }
 
-/* Clases personalizadas de la UI */
-.bg-gradient-mesh {
-  background-color: #0f172a;
-  background-image: radial-gradient(at 0% 0%, rgba(30, 64, 175, 0.15) 0, transparent 50%), 
-                    radial-gradient(at 100% 0%, rgba(37, 99, 235, 0.1) 0, transparent 50%);
+@layer components {
+  /* Cards */
+  .card {
+    @apply bg-surface-800 border border-surface-700 rounded-xl;
+  }
+  .card-hover {
+    @apply transition-all duration-200 hover:border-brand-500/40 hover:shadow-lg;
+  }
+
+  /* Badges de estado */
+  .badge {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-600 border;
+  }
+  .badge-dot {
+    @apply w-2 h-2 rounded-full flex-shrink-0;
+  }
+
+  /* Inputs */
+  .input-dark {
+    @apply w-full px-4 py-3 bg-surface-900 border border-surface-600 rounded-lg
+           text-base text-white placeholder-surface-500
+           focus:outline-none focus:border-brand-400 focus:ring-1 focus:ring-brand-400/20
+           transition-all duration-200;
+  }
+
+  .label-dark {
+    @apply block text-sm font-600 text-surface-300 mb-2;
+  }
+
+  /* Botones */
+  .btn-primary {
+    @apply flex items-center justify-center gap-2 px-5 py-3 bg-brand-600
+           hover:bg-brand-500 active:bg-brand-700
+           text-white text-sm font-600 rounded-lg
+           transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-secondary {
+    @apply flex items-center justify-center gap-2 px-5 py-3
+           border border-surface-600 hover:border-surface-500
+           text-surface-300 hover:text-white text-sm font-500 rounded-lg
+           transition-all duration-150 bg-transparent;
+  }
+  .btn-danger {
+    @apply flex items-center justify-center gap-2 px-5 py-3 bg-danger/10
+           hover:bg-danger/20 border border-danger/20 hover:border-danger/40
+           text-danger text-sm font-500 rounded-lg transition-all duration-150;
+  }
+  .btn-success {
+    @apply flex items-center justify-center gap-2 px-5 py-3 bg-success/10
+           hover:bg-success/20 border border-success/20 hover:border-success/40
+           text-success text-sm font-600 rounded-lg transition-all duration-150;
+  }
+
+  /* Select */
+  .select-dark {
+    @apply px-4 py-3 bg-surface-900 border border-surface-600 rounded-lg
+           text-base text-white focus:outline-none focus:border-brand-400
+           transition-colors duration-200 cursor-pointer;
+  }
+
+  /* Table */
+  .th { @apply text-left px-5 py-4 text-xs font-700 text-surface-400 uppercase tracking-widest; }
+  .td { @apply px-5 py-4 text-sm text-surface-200; }
 }
 
-.shadow-card-lg {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.25);
-}
+@layer utilities {
+  /* Gradiente del fondo */
+  .bg-gradient-mesh {
+    background-color: #0f172a;
+    background-image:
+      radial-gradient(at 0% 0%,   rgba(30, 64, 175, 0.18) 0, transparent 55%),
+      radial-gradient(at 100% 0%, rgba(37, 99, 235, 0.12) 0, transparent 55%);
+  }
 
-.card {
-  @apply bg-surface-800 border border-surface-700 rounded-xl;
+  /* Animaciones de entrada */
+  .animate-in { animation: fadeSlideIn 0.35s ease forwards; }
+  .animate-in-delay-1 { animation: fadeSlideIn 0.35s ease 0.05s forwards; opacity: 0; }
+  .animate-in-delay-2 { animation: fadeSlideIn 0.35s ease 0.10s forwards; opacity: 0; }
+  .animate-in-delay-3 { animation: fadeSlideIn 0.35s ease 0.15s forwards; opacity: 0; }
+  .animate-in-delay-4 { animation: fadeSlideIn 0.35s ease 0.20s forwards; opacity: 0; }
+
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Sombras */
+  .shadow-card    { box-shadow: 0 4px 24px rgba(0,0,0,0.4); }
+  .shadow-card-lg { box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+  .shadow-glow    { box-shadow: 0 0 20px rgba(59,130,246,0.25); }
 }
